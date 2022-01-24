@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Welcome {{current_user.username}}</h1>
+{% if session.get('CURR_POKEMON') != None %}
+
+
+
+<p><img src = "{{response['sprites']['front_default']}}" width = 200px height = 200px></p>
+<p>Name: {{response['name']}}</p>
+<p>Id: {{response['id']}}<p>
+<p>type: 
+{% for type in response['types'] %}
+{{type['type']['name']}}
+{% endfor %}
+</p>
+<p>weight: {{response['weight']/10}}kg</p>
+<p>height: {{response['height']/10}}m</p>
+<p>Held items: 
+    {% if response['held_items'] == [] %}
+    None
+    {% else %}
+    {% for item in response['held_items'] %}
+    <ol>{{item['item']['name']}}</ol>
+    {% endfor %}
+    </p>
+    {% endif %}
+<p>Moves: <div id = 'curr_move'>
+    {{response['moves'][0]['move']['name']}}
+</div>
+    
+</p>
+<p>
+    <button class = "previous_move" id = 'previous_move' data-id = '1'>Previous move</button>
+    <button class = "next_move" id = 'next_move' data-id = '1'>Next move</button>
+</p>
+
+<p>Games: <div id = 'curr_game'> {{response['game_indices'][0]['version']['name']}}</div>
+    <button class = "previous_game" id = 'previous_game' data-id = '1'>Previous game</button>
+    <button class = "next_game" id = 'next_game' data-id = '1'>Next game</button>
+</p>
+<p>Evolutions: in progress...
+<p>Generation: {{encounters['generation']['name']}}</p>
+<p>Habitat: 
+    {% if encounters['habitat']['name'] %}
+    {{encounters['habitat']['name']}}
+    {% else %}
+    Null
+    {% endif %}
+</p>
+<button class = "favorite_button" data-id = "{{response['id']}}">Favorite this pokemon</button>
+
+    
+    
+    
+</p>
+
+
+{% endif %}
+
+
+<form method = 'POST'>
+    {{form.hidden_tag()}}
+    {% for item in form if item.widget.input_type != 'hidden' %}
+    <p>{{item.label}}
+    {{item}}
+    {% for err in item.errors %}
+    {{err}}
+    {% endfor %}</p>
+    {% endfor %}
+    <button>Search</button>
+</form>
+<button class = "left_pokedex" data-id = "{{response['id'] - 1}}">previous pokemon</button>
+<button class = "right_pokedex" data-id = "{{response['id'] + 1}}">next pokemon</button>
+<form action ='/logout'>
+<button>logout</button>
+</form>
+<form action = '/favorites'>
+    <button>list of fav pokemon</button>
+</form>
+{% endblock %}

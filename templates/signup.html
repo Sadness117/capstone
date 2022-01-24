@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+<h1>Signup below</h1>
+<form action = '/signup' method = 'POST'>
+    {{form.hidden_tag()}}
+    {% for item in form if item.widget.input_type != 'hidden' %}
+    <p>{{item.label}}
+    {{item}}
+    {% for err in item.errors %}
+    {{err}}
+    {% endfor %}</p>
+    {% endfor %}
+    <button>create account</button>
+</form>
+{% endblock %}

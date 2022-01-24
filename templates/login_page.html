@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Welcome to the Pokedex, please login or sign up to contnue</h1>
+
+
+<form action = '/login' method = 'POST'>
+    {{form.hidden_tag()}}
+    {% for item in form if item.widget.input_type != 'hidden' %}
+    <p>{{item.label}}
+    {{item}}
+    {% for err in item.errors %}
+    {{err}}
+    {% endfor %}</p>
+    {% endfor %}
+    <button>Login</button>
+</form>
+
+<form action = '/signup'>
+    <button>signup here</button>
+</form>
+
+{% endblock %}
