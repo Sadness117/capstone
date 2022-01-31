@@ -51,7 +51,7 @@ class FavoritePokemon(db.Model):
 
     id = db.Column(db.Integer,primary_key=True)
     pokemon_name = db.Column(db.Text,nullable=False)
-    poke_id = db.Column(db.Integer,nullable=False)
+    poke_id = db.Column(db.Integer,nullable=False, unique = True)
     pokemon_link = db.Column(db.Text,nullable=False)
     pokemon_img = db.Column(db.Text,nullable=False)
     poke_user = db.Column(

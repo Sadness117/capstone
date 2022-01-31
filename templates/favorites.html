@@ -8,7 +8,7 @@
 {% for fav in favorites %}
 <div class = 'fav_{{fav.pokemon_name}}'>
 <img src = "{{fav.pokemon_img}}" width = 200px height = 200px></p>
-<li id = 'fav_{{fav.pokemon_name}}'>{{fav.pokemon_name}} <button class = 'remove_fav' id = 'remove_fav' data-id = '{{fav.pokemon_name}}'>Remove</button></li>
+<li id = 'fav_{{fav.pokemon_name}}'>Name: {{fav.pokemon_name}} Id: {{fav.poke_id}}<button class = 'remove_fav' id = 'remove_fav' data-id = '{{fav.pokemon_name}}'>Remove</button></li>
 </div>
 {% endfor %}
 </div>

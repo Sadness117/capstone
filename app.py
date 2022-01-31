@@ -1,10 +1,5 @@
-from ast import Add
-from difflib import diff_bytes
 import os
-from tabnanny import check
-
 import requests
-
 from flask import Flask, render_template, request, flash, redirect, session, g, abort
 from flask_debugtoolbar import DebugToolbarExtension
 from models import db, connect_db, User, FavoritePokemon
@@ -49,10 +44,13 @@ def favorite(id):
     pokemon_name = pokemon['name']
     current_user = User.query.get(session['USER_KEY'])
     new_favorite = FavoritePokemon(pokemon_name = session['CURR_POKEMON'], poke_id = pokemon_id, pokemon_link = f"https://pokeapi.co/api/v2/pokemon/{session['CURR_POKEMON']}", poke_user = session['USER_KEY'], pokemon_img = pokemon['sprites']['front_default'])
-    db.session.add(new_favorite)
-    db.session.commit()
-
-    return 'favorited'
+    try:
+        db.session.add(new_favorite)
+        db.session.commit()
+        return 'favorited'
+    except:
+        db.session.rollback()
+        return 'already favorited'
 
 @app.route('/favorites')
 def favorite_list():
@@ -68,7 +66,6 @@ def login():
     form = AddUser()
     if form.validate_on_submit():
         check_user = User.authenticate(username=form.username.data, password=form.password.data)
-        
         if check_user:
             current_user = User.query.filter_by(username = form.username.data).first()
             session['USER_KEY'] = current_user.id
@@ -91,7 +88,10 @@ def signup():
         return redirect('/pokedex_page')
     else: 
         return redirect('/signup')
-
+@app.route('/fix')
+def fix():
+    session['CURR_POKEMON'] = 'golurk'
+    return redirect('pokedex_page')
 @app.route('/signup')
 def signup_page():
     """this brings the user to the sign up page to create an account"""
@@ -107,25 +107,24 @@ def pokedex():
     else:
         return redirect('/')
     if current_user:
-
         form = SearchPokemon()
         if session.get('CURR_POKEMON') != None:
-            
-            
             pokemon = requests.get(f"https://pokeapi.co/api/v2/pokemon/{session['CURR_POKEMON']}").json()
             evolution_get = requests.get(f"https://pokeapi.co/api/v2/pokemon-species/{pokemon['id']}/").json()
             encounters = requests.get(f"https://pokeapi.co/api/v2/pokemon-species/{session['CURR_POKEMON']}").json()
-            
-            # return render_template('test.html')
-            # evolution = requests.get(evolution_get['evolution_chain']['url']).json()
             return render_template('home.html', response = pokemon, form = form, encounters = encounters, current_user = current_user)
-        
         else:
             return render_template('home.html', form = form, current_user = current_user)
     else:
         return redirect('/')
 
-
+@app.route('/pokemon/id', methods = ['POST'])
+def search_by_id():
+    """this will be the function to search for a pokemon by id"""
+    id = request.form['id']
+    next_pokemon = requests.get(f"https://pokeapi.co/api/v2/pokemon/{id}").json()
+    session['CURR_POKEMON'] = next_pokemon['name']
+    return redirect('/pokedex_page')
 
 @app.route('/pokemon/<int:id>')
 def change_pokemon(id):
@@ -134,7 +133,7 @@ def change_pokemon(id):
     the api list"""
     next_pokemon = requests.get(f"https://pokeapi.co/api/v2/pokemon/{id}").json()
     session['CURR_POKEMON'] = next_pokemon['name']
-    return redirect('/')
+    return redirect('/pokedex_page')
 
 @app.route('/pokedex_page', methods = ['POST'])
 def search_pokemon():
@@ -150,26 +149,92 @@ def search_pokemon():
         session['CURR_POKEMON'] = form.pokemon.data
         return redirect('/pokedex_page')
 
-@app.route('/diff_move/<int:num>', methods = ['POST'])
+
+
+
+
+@app.route('/info/<id>', methods = ['POST'])
+def change_info(id):
+    '''this handles the call for the screen updates'''
+    pokemon = requests.get(f"https://pokeapi.co/api/v2/pokemon/{session['CURR_POKEMON']}").json()
+    change = pokemon
+    if id == 'Weight:':
+        change = pokemon['weight']/10
+        return f'{change}kg'
+
+    elif id == 'Type:':
+        change = pokemon['types']
+        many_types = ''
+        for element in change:
+            many_types = many_types + ' ' + element['type']['name']
+        return many_types
+
+    elif id == 'Habitat:':
+        # not all pokemon have a habitat, so it has some error handling
+        try:
+            encounters = requests.get(f"https://pokeapi.co/api/v2/pokemon-species/{session['CURR_POKEMON']}").json()
+            change = encounters['habitat']['name']
+            return change
+        except:
+            return 'None'
+
+    elif id == 'Name:':
+        change = pokemon['name']
+        return change
+
+    elif id == 'Height:':
+        change = pokemon['height']/10
+        return f'{change}m'
+
+    elif id == 'Moves:':
+        change = pokemon['moves'][0]['move']['name']
+        return change
+
+    elif id == 'Items:':
+        # not all pokemon have items so it has some error handling
+        try:
+            change = pokemon['held_items'][0]['item']['name']
+            return change
+        except:
+            return 'None'
+            
+    elif id == 'Games:':
+        change = pokemon['game_indices'][0]['version']['name']
+        return change
+
+
+@app.route('/diff_item/<int:num>')
+def diff_item(num):
+    curr_pokemon = requests.get(f"https://pokeapi.co/api/v2/pokemon/{session['CURR_POKEMON']}").json()
+    try:
+        diff_item = curr_pokemon['held_items'][num]['item']['name']
+        return diff_item
+    except:
+        return 'none'
+@app.route('/diff_move/<int:num>')
 def diff_move(num):
     """cycles through the list of moves for the user"""
     curr_pokemon = requests.get(f"https://pokeapi.co/api/v2/pokemon/{session['CURR_POKEMON']}").json()
-    diff_move = curr_pokemon['moves'][num]['move']['name']
-    return diff_move
+    try:    
+        diff_move = curr_pokemon['moves'][num]['move']['name']
+        return diff_move
+    except:
+        return 'none'
 
-@app.route('/diff_game/<int:num>', methods = ['POST'])
+@app.route('/diff_game/<int:num>')
 def diff_game(num):
     """cycles through the list of games for the user"""
     curr_pokemon = requests.get(f"https://pokeapi.co/api/v2/pokemon/{session['CURR_POKEMON']}").json()
-    diff_game = curr_pokemon['game_indices'][num]['version']['name']
-    return diff_game
+    try:    
+        diff_game = curr_pokemon['game_indices'][num]['version']['name']
+        return diff_game
+    except:
+        return 'none'
 
 @app.route('/remove_fav/<pokemon>', methods = ['POST'])
 def remove_fav(pokemon):
     """removes the users favorite pokemon from the database"""
-
     curr_user = session['USER_KEY']
-    print(curr_user)
     fav_pokemon = FavoritePokemon.query.filter_by(pokemon_name = pokemon, poke_user = curr_user).first()
     db.session.delete(fav_pokemon)
     db.session.commit()

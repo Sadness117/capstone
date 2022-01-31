@@ -4,57 +4,58 @@
 {% if session.get('CURR_POKEMON') != None %}
 
 
+<div id = 'pokedex' class = 'normal_pokedex'>
+    <div class ='open_pokedex'></div>
+    <div class = 'long_fold2'></div>
+    <div class = 'line_one2'></div>
+    <div class = 'line_two2'></div>
+    <div class = 'line_three2'></div>
+    <div class = 'top_fold2'></div>
+    <div class = 'bottom_fold2'></div>
+    <div class = 'camera2'></div>
+    <div class = 'red_dot2'></div>
+    <div class = 'yellow_dot2'></div>
+    <div class = 'green_dot2'></div>
+    <div class ='white_camera2'></div>
+    <div class = 'long_fold3'></div>
+    <div class = 'favorite_button' id = 'favorite_button' data-id = "{{response['id']}}"> </div>
+    </div>
+<div id = 'pokedex' class = 'right_pokedex'>
+    <div class = 'open_right_pokedex'></div>
+    <div class = 'behind_screen'></div>
+    <div class = 'screen'><img src = "{{response['sprites']['front_default']}}" width = 170px height = 170px></div>
 
-<p><img src = "{{response['sprites']['front_default']}}" width = 200px height = 200px></p>
-<p>Name: {{response['name']}}</p>
-<p>Id: {{response['id']}}<p>
-<p>type: 
-{% for type in response['types'] %}
-{{type['type']['name']}}
-{% endfor %}
-</p>
-<p>weight: {{response['weight']/10}}kg</p>
-<p>height: {{response['height']/10}}m</p>
-<p>Held items: 
-    {% if response['held_items'] == [] %}
-    None
-    {% else %}
-    {% for item in response['held_items'] %}
-    <ol>{{item['item']['name']}}</ol>
-    {% endfor %}
-    </p>
-    {% endif %}
-<p>Moves: <div id = 'curr_move'>
-    {{response['moves'][0]['move']['name']}}
+    <div class = 'info_screen' id = 'info_screen'>Name:</div>
+    <div class = 'info_display' id = 'info_display'>{{response['name']}}</div>
+    <div class = 'info_buttons'>
+        <div class = 'type_button' id = 'type_button' data-id = 'Type:'>Type</div>
+        <div class = 'weight_button' id = 'weight_button' data-id = 'Weight:'>Weight</div>
+        <div class = 'held_items_button' id = 'held_items_button' data-id = 'Items:'>Items</div>
+        <div class = 'moves_button' id = 'moves_button' data-id = 'Moves:'>Moves</div>
+        <div class = 'games_button' id = 'games_button' data-id = 'Games:'>Games</div>
+        <div class = 'height_button' id= 'height_button' data-id = 'Height:'>Height</div>
+        <div class = 'habitat_button' id = 'habitat_button' data-id = 'Habitat:'>Habitat</div>
+        <div class = 'pokemon_name' id = 'pokemon_name' data-id = 'Name:'>Name</div>
+
+    </div>
+    <form action = '/pokemon/id' method = 'POST'>
+        <input type = 'number' class = 'id_display' value = "{{response['id']}}" name = 'id'>
+    </form>
+    
+    <div class = 'id_label'>ID:</div>
+    <!-- <div class = 'id_display' >{{response['id']}}</div> -->
+    <div class = 'dpads'>
+        <div class = 'dpad1' data-id = 'up' data-pad = 'one' id ='dpad1'></div>
+        <div class = 'dpad2' data-id = "{{response['id'] + 1}}" id ='dpad2'></div>
+        <div class = 'dpad3' data-id = 'down' data-pad = 'three'id ='dpad3'></div>
+        <div class = 'dpad4' data-id = "{{response['id'] - 1}}" id ='dpad4'></div>
+    </div>
 </div>
-    
-</p>
-<p>
-    <button class = "previous_move" id = 'previous_move' data-id = '1'>Previous move</button>
-    <button class = "next_move" id = 'next_move' data-id = '1'>Next move</button>
-</p>
-
-<p>Games: <div id = 'curr_game'> {{response['game_indices'][0]['version']['name']}}</div>
-    <button class = "previous_game" id = 'previous_game' data-id = '1'>Previous game</button>
-    <button class = "next_game" id = 'next_game' data-id = '1'>Next game</button>
-</p>
-<p>Evolutions: in progress...
-<p>Generation: {{encounters['generation']['name']}}</p>
-<p>Habitat: 
-    {% if encounters['habitat']['name'] %}
-    {{encounters['habitat']['name']}}
-    {% else %}
-    Null
-    {% endif %}
-</p>
-<button class = "favorite_button" data-id = "{{response['id']}}">Favorite this pokemon</button>
-
-    
-    
-    
-</p>
 
 
+
+
+<!-- <button class = "favorite_button" data-id = "{{response['id']}}">Favorite this pokemon</button> -->
 {% endif %}
 
 
@@ -69,8 +70,7 @@
     {% endfor %}
     <button>Search</button>
 </form>
-<button class = "left_pokedex" data-id = "{{response['id'] - 1}}">previous pokemon</button>
-<button class = "right_pokedex" data-id = "{{response['id'] + 1}}">next pokemon</button>
+
 <form action ='/logout'>
 <button>logout</button>
 </form>
